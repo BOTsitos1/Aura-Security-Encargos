@@ -23,6 +23,7 @@ const client = new Client({
 });
 
 const TOKEN = process.env.TOKEN;
+console.log("TOKEN detectado:", TOKEN ? "SI" : "NO");
 
 const MAX_ACTIVOS = 2;
 const TIEMPO = 30 * 60 * 1000;
