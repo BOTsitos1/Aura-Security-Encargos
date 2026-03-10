@@ -93,4 +93,7 @@ function finalizar(user){
 
 }
 
-client.login(TOKEN);
+client.on("error", console.error);
+process.on("unhandledRejection", console.error);
+
+client.login(TOKEN).catch(console.error);
