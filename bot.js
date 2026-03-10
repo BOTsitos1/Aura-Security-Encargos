@@ -1,30 +1,19 @@
+// Importa Discord.js
 const { Client, GatewayIntentBits } = require('discord.js');
-const express = require("express");
 
-// servidor web para Render
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get("/", (req, res) => {
-  res.send("Bot activo");
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor web activo en puerto ${PORT}`);
-});
-
-// cliente de discord
+// Crea el cliente con todos los intents necesarios
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.Guilds,          // necesario para que el bot se conecte a servidores
+    GatewayIntentBits.GuildMessages,   // necesario para leer mensajes en canales
+    GatewayIntentBits.MessageContent   // necesario si manejas contenido de mensajes/interacciones
   ]
 });
 
+// Token del bot desde variables de entorno (Render)
 const TOKEN = process.env.TOKEN;
-console.log("TOKEN detectado:", TOKEN ? "SI" : "NO");
 
+// Configuración de tu bot
 const MAX_ACTIVOS = 2;
 const TIEMPO = 30 * 60 * 1000;
 const COOLDOWN = 10 * 60 * 1000;
@@ -33,12 +22,13 @@ let activos = [];
 let espera = [];
 let cooldown = new Map();
 
+// Evento ready
 client.once('ready', () => {
   console.log('Bot encendido');
 });
 
+// Evento para manejar comandos slash
 client.on('interactionCreate', async interaction => {
-
   if (!interaction.isChatInputCommand()) return;
 
   const user = interaction.user.id;
@@ -70,30 +60,28 @@ client.on('interactionCreate', async interaction => {
 
 });
 
-function finalizar(user){
-
+// Función para finalizar encargo y manejar cooldown
+function finalizar(user) {
   activos = activos.filter(u => u !== user);
 
-  cooldown.set(user,true);
+  cooldown.set(user, true);
 
-  setTimeout(()=>{
+  setTimeout(() => {
     cooldown.delete(user);
-  },COOLDOWN);
+  }, COOLDOWN);
 
-  if(espera.length > 0){
-
+  if (espera.length > 0) {
     const siguiente = espera.shift();
     activos.push(siguiente);
-
-    setTimeout(()=>{
+    setTimeout(() => {
       finalizar(siguiente);
-    },TIEMPO);
-
+    }, TIEMPO);
   }
-
 }
 
+// Captura errores globales para verlos en logs
 client.on("error", console.error);
 process.on("unhandledRejection", console.error);
 
+// Login del bot
 client.login(TOKEN).catch(console.error);
