@@ -1,6 +1,7 @@
 {
   "name": "aura-security-bot",
   "version": "1.0.0",
+  "description": "Bot de Discord para encargos",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
