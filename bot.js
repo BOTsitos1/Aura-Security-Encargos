@@ -1,23 +1,30 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 
+// Creamos el cliente con los intents necesarios
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
 });
 
-const TOKEN = process.env.TOKEN;
+const TOKEN = process.env.TOKEN; // tu token está en la variable de entorno
 
-const MAX_ACTIVOS = 2;
-const TIEMPO = 30 * 60 * 1000;
-const COOLDOWN = 10 * 60 * 1000;
+const MAX_ACTIVOS = 2;                  // máximo de usuarios activos al mismo tiempo
+const TIEMPO = 30 * 60 * 1000;         // 30 minutos en milisegundos
+const COOLDOWN = 10 * 60 * 1000;       // 10 minutos de cooldown
 
 let activos = [];
 let espera = [];
 let cooldown = new Map();
 
+// Evento cuando el bot se conecta
 client.once('ready', () => {
   console.log('Bot encendido');
 });
 
+// Evento cuando alguien usa un comando
 client.on('interactionCreate', async interaction => {
 
   if (!interaction.isChatInputCommand()) return;
@@ -51,27 +58,29 @@ client.on('interactionCreate', async interaction => {
 
 });
 
-function finalizar(user){
+// Función para finalizar un encargo
+function finalizar(user) {
 
-activos = activos.filter(u => u !== user);
+  activos = activos.filter(u => u !== user);
 
-cooldown.set(user,true);
+  cooldown.set(user, true);
 
-setTimeout(()=>{
-cooldown.delete(user);
-},COOLDOWN);
+  setTimeout(() => {
+    cooldown.delete(user);
+  }, COOLDOWN);
 
-if(espera.length > 0){
+  if (espera.length > 0) {
 
-const siguiente = espera.shift();
-activos.push(siguiente);
+    const siguiente = espera.shift();
+    activos.push(siguiente);
 
-setTimeout(()=>{
-finalizar(siguiente);
-},TIEMPO);
+    setTimeout(() => {
+      finalizar(siguiente);
+    }, TIEMPO);
+
+  }
 
 }
 
-}
-
+// Arranca el bot
 client.login(TOKEN);
